@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bike Sharing Demand Prediction</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+        }
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333333;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        label {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        input, select {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        button {
+            padding: 10px;
+            background: #007BFF;
+            color: #ffffff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .output {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 1.2em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Bike Sharing Demand Prediction</h1>
+        <form id="prediction-form">
+            <label for="holiday">Holiday (0 or 1):</label>
+            <input type="number" id="holiday" name="holiday" required>
+        
+            <label for="workingday">Working Day (0 or 1):</label>
+            <input type="number" id="workingday" name="workingday" required>
+        
+            <label for="atemp">Feels Like Temperature:</label>
+            <input type="number" step="0.01" id="atemp" name="atemp" required>
+        
+            <label for="humidity">Humidity:</label>
+            <input type="number" id="humidity" name="humidity" required>
+        
+            <label for="windspeed">Windspeed:</label>
+            <input type="number" step="0.01" id="windspeed" name="windspeed" required>
+        
+            <label for="hour">Hour (0-23):</label>
+            <input type="number" id="hour" name="hour" required>
+        
+            <label for="season">Season:</label>
+            <select id="season" name="season" required>
+                <option value="0">Season 1</option>
+                <option value="1">Season 2</option>
+                <option value="2">Season 3</option>
+                <option value="3">Season 4</option>
+            </select>
+        
+            <label for="weather">Weather:</label>
+            <select id="weather" name="weather" required>
+                <option value="0">Weather 1</option>
+                <option value="1">Weather 2</option>
+                <option value="2">Weather 3</option>
+                <option value="3">Weather 4</option>
+            </select>
+        
+            <button type="button" onclick="predictDemand()">Predict</button>
+        </form>        
+        <div class="output" id="output"></div>
+    </div>
+
+    <script>
+        async function predictDemand() {
+            const formData = {
+                holiday: parseInt(document.getElementById('holiday').value),
+                workingday: parseInt(document.getElementById('workingday').value),
+                atemp: parseFloat(document.getElementById('atemp').value),
+                humidity: parseInt(document.getElementById('humidity').value),
+                windspeed: parseFloat(document.getElementById('windspeed').value),
+                hour: parseInt(document.getElementById('hour').value),
+                season__1: document.getElementById('season').value == '0' ? 1 : 0,
+                season__2: document.getElementById('season').value == '1' ? 1 : 0,
+                season__3: document.getElementById('season').value == '2' ? 1 : 0,
+                season__4: document.getElementById('season').value == '3' ? 1 : 0,
+                weather__1: document.getElementById('weather').value == '0' ? 1 : 0,
+                weather__2: document.getElementById('weather').value == '1' ? 1 : 0,
+                weather__3: document.getElementById('weather').value == '2' ? 1 : 0,
+                weather__4: document.getElementById('weather').value == '3' ? 1 : 0
+            };
+
+            try {
+                const response = await fetch('http://127.0.0.1:5000/predict', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+
+                const result = await response.json();
+                document.getElementById('output').textContent = 
+                    `Predicted Bike Count: ${result.predicted_count || 'Error: ' + (result.error || 'Unknown error')}`;
+            } catch (error) {
+                document.getElementById('output').textContent = 'Error: Unable to predict. Check API connection.';
+            }
+        }
+
+    </script>
+</body>
+</html>
